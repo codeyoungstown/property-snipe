@@ -51,6 +51,8 @@ func sync() {
 	var parcel_id string
 	var owner string
 
+	updates := make(map[int]string)
+
 	for rows.Next() {
 		rows.Scan(&id, &parcel_id, &owner)
 
@@ -58,12 +60,15 @@ func sync() {
 
 		if owner != new_owner {
 			fmt.Printf("New owner for %s: %s\n", parcel_id, new_owner)
-
-			// NOT WORKING FIXME
-			statement, _ := db.Prepare("update properties set owner=? where id=?")
-			statement.Exec(owner, id)
+			updates[id] = new_owner
 		}
 	}
+
+	for k, v := range updates {
+		statement, _ := db.Prepare("UPDATE properties SET owner=? WHERE id=?")
+		statement.Exec(v, k)
+	}
+
 	db.Close()
 }
 
@@ -95,10 +100,10 @@ func add(parcel_id string) {
 	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS properties (id INTEGER PRIMARY KEY, parcel_id TEXT, owner TEXT)")
 	statement.Exec()
 
-	stmt, err := db.Prepare("INSERT INTO properties(parcel_id, owner) values(?,?)")
+	statement, err = db.Prepare("INSERT INTO properties(parcel_id, owner) values(?,?)")
 	_checkErr(err)
 
-	stmt.Exec(parcel_id, owner)
+	statement.Exec(parcel_id, owner)
 
 	db.Close()
 }
