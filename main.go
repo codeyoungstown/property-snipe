@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 )
 
 const AUDITOR_URL = "http://oh-mahoning-auditor.publicaccessnow.com/DesktopModules/OWS/IM.aspx?&mpropertynumber=%s&_OWS_=lxC:1,lxP:0,s:1x,m:427,pm:116,p:89,lxSrc:dnn$ctr427$PropertyInfo,key:Module.Load,file:/DesktopModules/PropertyInfo/App_LocalResources/PropertyInfo.ascx.resx,pp:0"
@@ -89,6 +90,8 @@ func list() {
 }
 
 func add(parcel_id string) {
+	parcel_id = strings.TrimSpace(parcel_id)
+
 	db, err := sql.Open("sqlite3", "./db.db")
 	_checkErr(err)
 
