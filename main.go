@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strconv"
 )
 
 const AUDITOR_URL = "http://oh-mahoning-auditor.publicaccessnow.com/DesktopModules/OWS/IM.aspx?&mpropertynumber=%s&_OWS_=lxC:1,lxP:0,s:1x,m:427,pm:116,p:89,lxSrc:dnn$ctr427$PropertyInfo,key:Module.Load,file:/DesktopModules/PropertyInfo/App_LocalResources/PropertyInfo.ascx.resx,pp:0"
@@ -84,7 +83,7 @@ func list() {
 
 	for rows.Next() {
 		rows.Scan(&id, &parcel_id, &owner)
-		fmt.Println(strconv.Itoa(id) + " " + parcel_id + " " + owner)
+		fmt.Println(parcel_id + " " + owner)
 	}
 	db.Close()
 }
@@ -93,17 +92,18 @@ func add(parcel_id string) {
 	db, err := sql.Open("sqlite3", "./db.db")
 	_checkErr(err)
 
-	// FIXME Check exists already and bail
-
 	owner := _get_owner(parcel_id)
 
 	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS properties (id INTEGER PRIMARY KEY, parcel_id TEXT, owner TEXT)")
 	statement.Exec()
 
-	statement, err = db.Prepare("INSERT INTO properties(parcel_id, owner) values(?,?)")
-	_checkErr(err)
+	var id int
+	err = db.QueryRow(`SELECT id FROM properties WHERE parcel_id=?`, parcel_id).Scan(&id)
 
-	statement.Exec(parcel_id, owner)
+	if err == sql.ErrNoRows {
+		statement, _ = db.Prepare("INSERT INTO properties(parcel_id, owner) values(?,?)")
+		statement.Exec(parcel_id, owner)
+	}
 
 	db.Close()
 }
