@@ -9,7 +9,7 @@ Head over to the releases tab and download the executable for your operating sys
 # Usage
 
 ## The database
-Data is stored in a sqlite database file that sits alongside the executable. It is called `db.db`. Do not delete this file. You can back up this file to another location if you'd like.
+Data is stored in a sqlite database file that sits alongside the executable. It is called `snipe.db`. Do not delete this file. You can back up this file to another location if you'd like.
 
 ## Adding a property
 Run `snipe add PARCEL_ID` to add a new property to the database.

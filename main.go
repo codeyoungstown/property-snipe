@@ -135,7 +135,7 @@ func _get_or_create_db() *sql.DB {
 	}
 	exPath := filepath.Dir(ex)
 
-	db, _ := sql.Open("sqlite3", exPath+string(os.PathSeparator)+"db.db")
+	db, _ := sql.Open("sqlite3", exPath+string(os.PathSeparator)+"snipe.db")
 
 	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS properties (id INTEGER PRIMARY KEY, parcel_id TEXT, owner TEXT)")
 	statement.Exec()
