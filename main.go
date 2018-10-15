@@ -42,8 +42,7 @@ func main() {
 }
 
 func sync() {
-	db, err := sql.Open("sqlite3", "./db.db")
-	_checkErr(err)
+	db := _get_or_create_db()
 
 	rows, _ := db.Query("SELECT id, parcel_id, owner FROM properties")
 
@@ -73,8 +72,7 @@ func sync() {
 }
 
 func list() {
-	db, err := sql.Open("sqlite3", "./db.db")
-	_checkErr(err)
+	db := _get_or_create_db()
 
 	rows, _ := db.Query("SELECT id, parcel_id, owner FROM properties")
 
@@ -92,19 +90,15 @@ func list() {
 func add(parcel_id string) {
 	parcel_id = strings.TrimSpace(parcel_id)
 
-	db, err := sql.Open("sqlite3", "./db.db")
-	_checkErr(err)
+	db := _get_or_create_db()
 
 	owner := _get_owner(parcel_id)
 
-	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS properties (id INTEGER PRIMARY KEY, parcel_id TEXT, owner TEXT)")
-	statement.Exec()
-
 	var id int
-	err = db.QueryRow(`SELECT id FROM properties WHERE parcel_id=?`, parcel_id).Scan(&id)
+	err := db.QueryRow(`SELECT id FROM properties WHERE parcel_id=?`, parcel_id).Scan(&id)
 
 	if err == sql.ErrNoRows {
-		statement, _ = db.Prepare("INSERT INTO properties(parcel_id, owner) values(?,?)")
+		statement, _ := db.Prepare("INSERT INTO properties(parcel_id, owner) values(?,?)")
 		statement.Exec(parcel_id, owner)
 	}
 
@@ -112,8 +106,9 @@ func add(parcel_id string) {
 }
 
 func remove(parcel_id string) {
-	db, err := sql.Open("sqlite3", "./db.db")
-	_checkErr(err)
+	parcel_id = strings.TrimSpace(parcel_id)
+
+	db := _get_or_create_db()
 
 	statement, err := db.Prepare("DELETE FROM properties WHERE parcel_id=?")
 	_checkErr(err)
@@ -121,6 +116,16 @@ func remove(parcel_id string) {
 	statement.Exec(parcel_id)
 
 	db.Close()
+}
+
+func _get_or_create_db() *sql.DB {
+	db, _ := sql.Open("sqlite3", "./db.db")
+
+	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS properties (id INTEGER PRIMARY KEY, parcel_id TEXT, owner TEXT)")
+	statement.Exec()
+
+	return db
+
 }
 
 func _checkErr(err error) {
@@ -137,6 +142,12 @@ func _get_owner(parcel_id string) string {
 
 	r, _ := regexp.Compile("Owner Name</td><td >([\\w ]+)</td>")
 
-	// FIXME handle no match
-	return r.FindStringSubmatch(string(body[:]))[1]
+	match := r.FindStringSubmatch(string(body[:]))
+
+	if len(match) < 2 {
+		fmt.Fprintf(os.Stderr, "No property found for that parcel_id\n")
+		os.Exit(1)
+	}
+
+	return strings.TrimSpace(match[1])
 }
