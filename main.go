@@ -18,8 +18,8 @@ func main() {
 
 	if len(arg) == 1 {
 		sync()
-		fmt.Println("Sync and compare done.")
-		os.Exit(0)
+		fmt.Fprintf(os.Stderr, "error: no command given\n")
+		os.Exit(1)
 	}
 
 	cmd := arg[1]
@@ -35,6 +35,9 @@ func main() {
 		remove(input)
 	} else if cmd == "list" {
 		list()
+	} else if cmd == "sync" {
+		sync()
+		fmt.Println("Sync and compare done.")
 	} else {
 		fmt.Fprintf(os.Stderr, "error: invalid command\n")
 		os.Exit(1)
