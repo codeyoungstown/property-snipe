@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -128,7 +129,13 @@ func remove(parcel_id string) {
 }
 
 func _get_or_create_db() *sql.DB {
-	db, _ := sql.Open("sqlite3", "./db.db")
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+
+	db, _ := sql.Open("sqlite3", exPath+string(os.PathSeparator)+"db.db")
 
 	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS properties (id INTEGER PRIMARY KEY, parcel_id TEXT, owner TEXT)")
 	statement.Exec()
