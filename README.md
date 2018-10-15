@@ -3,6 +3,9 @@ CLI application for monitoring property transfers in Mahoning County.
 
 This tool keeps a local database, alongside the executable, that stores parcel_ids and owners. When a `sync` is ran, it checks each parcel against the Mahoning County Auditor site. If a new owner is detected, it will output an alert and also update the database.
 
+# Installation
+Head over to the releases tab and download the executable for your operating system.
+
 # Usage
 
 ## The database
