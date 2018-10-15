@@ -100,6 +100,10 @@ func add(parcel_id string) {
 	if err == sql.ErrNoRows {
 		statement, _ := db.Prepare("INSERT INTO properties(parcel_id, owner) values(?,?)")
 		statement.Exec(parcel_id, owner)
+		fmt.Printf("Parcel added %s: %s\n", parcel_id, owner)
+	} else {
+		fmt.Fprintf(os.Stderr, "error: This parcel already exists in the database\n")
+		os.Exit(1)
 	}
 
 	db.Close()
@@ -114,6 +118,8 @@ func remove(parcel_id string) {
 	_checkErr(err)
 
 	statement.Exec(parcel_id)
+
+	fmt.Printf("Parcel removed: %s\n", parcel_id)
 
 	db.Close()
 }
