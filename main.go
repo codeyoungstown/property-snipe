@@ -156,7 +156,7 @@ func _get_owner(parcel_id string) string {
 	body, _ := ioutil.ReadAll(res.Body)
 	res.Body.Close()
 
-	r, _ := regexp.Compile("Owner Name</td><td >([\\w ]+)</td>")
+	r, _ := regexp.Compile("Owner Name</td><td >(.+)</td>")
 
 	match := r.FindStringSubmatch(string(body[:]))
 
